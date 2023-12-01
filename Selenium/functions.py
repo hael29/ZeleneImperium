@@ -6,6 +6,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 import time
 from crops import crop_class_dict as ccd
 
+
 def setup_driver():
     options = Options()
     options.add_experimental_option("detach", True)
@@ -62,14 +63,6 @@ def harvest(driver):
     close_harvest_gui(driver)
 
 
-def is_empty(tile_id, driver):
-    tile = driver.find_element("id", tile_id)
-    tile_html = tile.get_attribute("innerHTML")
-    start_index = tile_html.find("produkte") + 9
-    end_index = tile_html.find(".gif")
-    return tile_html[start_index:end_index] == "0"
-
-
 def select_crop(crop_name, driver):
     try:
         crop = driver.find_element("class name", ccd[crop_name])
@@ -96,7 +89,7 @@ def water_crops(driver):
     for tile_number in range(1, 205):
         tile_id = f'gardenTile{tile_number}'
         tile = driver.find_element("id", tile_id)
-        if not is_obstacle(tile):
+        if not (is_obstacle(tile) or is_watered(tile) or not(is_empty(tile))):
             tile.click()
 
     driver.find_element("id", "anpflanzen").click()  # deselects watering can at the end.
@@ -111,8 +104,18 @@ def is_obstacle(tile):
     for obstacle in obstacles:
         if obstacle in tile_html[start_index:end_index]:
             return True
-
     return False
+
+
+def is_empty(tile):
+    tile_html = tile.get_attribute("innerHTML")
+    start_index = tile_html.find("produkte") + 9
+    return tile_html[start_index] != "0"
+
+def is_watered(tile):
+    tile_html = tile.get_attribute("innerHTML")
+    start_index = tile_html.find('class="wasser"') - 7
+    return tile_html[start_index] != "0"
 
 
 def get_supported_crops(dict):
@@ -121,5 +124,8 @@ def get_supported_crops(dict):
         crops += f'{crop}, '
     return crops[:-2]
 
-
+def tile_info(tilename, driver):
+    tile = driver.find_element("id", tilename)
+    print(is_empty(tile))
+    print(is_watered(tile))
 
