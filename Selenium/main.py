@@ -4,7 +4,7 @@ import time
 
 driver = fc.setup_driver()
 driver.get("https://s2.zeleneimperium.cz/main.php?page=garden")
-fc.login("mtlapak", "61509fd6", driver)
+fc.login(USERNAME, PASSWORD, driver)
 time.sleep(1)
 fc.accept_cookies(driver)
 
